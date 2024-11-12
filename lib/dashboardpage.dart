@@ -11,7 +11,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  List pages= [Homepage(),detail_page( title: "", desc:"") ,addtask(),profilePage()];
+  List pages= [Homepage() ,addtask(),profilePage()];
 
 int selectedPage=0;
 
@@ -29,7 +29,7 @@ int selectedPage=0;
           },
           items:const [
             BottomNavigationBarItem(icon:Icon(Icons.home,color: Colors.red,size: 25,),label: "" ),
-            BottomNavigationBarItem(icon:Icon(Icons.graphic_eq, color: Colors.red,size: 25,) ,label: ""),
+
 
             BottomNavigationBarItem(icon: Icon(Icons.add_circle_outlined,color: Colors.red,size: 35,),label: ""),
            // BottomNavigationBarItem(icon: Icon(Icons.notifications_active,size: 25,color: Colors.red,),label: ""),

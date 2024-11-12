@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/dashboardpage.dart';
 import 'package:task_manager/provider.dart';
+import 'package:task_manager/splashPage.dart';
 //import 'package:todo/provider.dart';
 
 import 'db_helper.dart';
 import 'firebase_options.dart';
-import 'login_page.dart';
+import 'loginpage.dart';
+import 'signin.dart';
+import 'notifications.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  //await NotificationServices.initialize();
   runApp(ChangeNotifierProvider(
       child:  MyApp(),
       create: (context)=>taskprovider(dBhelper: DBhelper.getinstance())),
@@ -26,7 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home:Dashboard(),
+      home:Splashpage(),
     );
 
   }

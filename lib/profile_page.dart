@@ -1,6 +1,14 @@
 
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:task_manager/loginpage.dart';
+import 'package:task_manager/provider.dart';
 //import 'package:todo/db_helper.dart';
 
 import 'db_helper.dart';
@@ -14,6 +22,7 @@ class profilePage extends StatefulWidget {
 }
 
 class _profilePageState extends State<profilePage> {
+ static  File? imgfile;
   DBhelper dBhelper =DBhelper.getinstance();
   double slidervalue=10.0;
   List<Map<String, dynamic>> allnotes=[];
@@ -45,6 +54,8 @@ class _profilePageState extends State<profilePage> {
     },
 
   ];
+  XFile? imgPicked;
+  bool isCamera=false;
   @override
   Widget build(BuildContext context) {
 
@@ -76,10 +87,23 @@ class _profilePageState extends State<profilePage> {
 
                       ),
                       SizedBox(width: 15,),
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage("assets/img/IMG_20240316_203634_698.jpg"),
+                      InkWell(
+                        onTap: (){
+                          showModalBottomSheet(
+                              //isDismissible: false,
+                              //enableDrag: false,
+                              context: context,
+                              builder: (_) {
+                                return ShowModalBottom();
+                              });
 
+                        },
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage:imgfile !=null? FileImage(imgfile!):null
+
+
+                        ),
                       ),
                       SizedBox(width: 15,),
                       Text.rich(
@@ -112,15 +136,20 @@ class _profilePageState extends State<profilePage> {
                       SizedBox(height: 13,),
                       ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey,
+                              backgroundColor: Colors.redAccent,
                               maximumSize: Size(200, 50),
                               minimumSize: Size(150, 40),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(6),
 
+
                               )
                           ),
-                          onPressed: (){}, child: Text("product manager",style: TextStyle(color: Colors.white),)),
+                          onPressed: ()async{
+                            SharedPreferences prefs=  await SharedPreferences.getInstance();
+                            prefs.setBool('isLoggedIn', false);
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>LoginPage()));
+                          }, child: Text("Log out",style: TextStyle(color: Colors.white),)),
                       SizedBox(height: 13,),
                       ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -178,6 +207,70 @@ class _profilePageState extends State<profilePage> {
     );
 
   }
+  void getimg(bool camera)async{
+    if(camera){
+       imgPicked= await ImagePicker().pickImage(source: ImageSource.camera);
+    }else{
+      imgPicked= await ImagePicker().pickImage(source: ImageSource.gallery);
+    }
+     imgCrooper();
+    if(imgPicked!=null) {
+      Provider.of<taskprovider>(context,listen: false).setImage(File(imgPicked!.path));
+    }
+}
+Widget ShowModalBottom(){
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(onPressed: (){
+            isCamera= true;
+            getimg(isCamera);
+            Navigator.pop(context);
+          }, child: Text("Open Camera")),
+          ElevatedButton(onPressed: (){
+            isCamera=false;
+            getimg(isCamera);
+            Navigator.pop(context);
+          }, child: Text("Open Gallery"))
+         ]
+      ),
+    );
+}
+void imgCrooper()async{
+    if(imgPicked!=null){
+      CroppedFile? croppedFile= await ImageCropper().cropImage(sourcePath: imgPicked!.path,
+          uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: "Cropper",
+          toolbarColor: Colors.deepOrange,
+          toolbarWidgetColor: Colors.white,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+          ]
+
+        ),
+        IOSUiSettings(
+          title: "Cropper",
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square
+          ]
+        ),
+        WebUiSettings(context: context),
+
+      ]);
+      if(croppedFile!=null){
+        imgfile=File(croppedFile.path);
+
+        setState(() {
+
+        });
+      }
+    }
+}
+  
 
 }
 

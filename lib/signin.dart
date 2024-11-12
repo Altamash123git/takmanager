@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_manager/dashboardpage.dart';
+import 'package:task_manager/loginpage.dart';
 //import 'package:todo/provider.dart';
 
 import 'home_page.dart';
@@ -20,7 +23,27 @@ class _loginpageState extends State<loginpage> {
   TextEditingController namecontroller= TextEditingController();
   TextEditingController emailcontroller= TextEditingController();
   TextEditingController paswrdcontroller= TextEditingController();
+  TextEditingController phonecontroller= TextEditingController();
   bool ischecked= false;
+  String uid="";
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUid();
+    setState(() {
+
+    });
+  }
+  void getUid()async{
+    var prefs= await  SharedPreferences.getInstance();
+    uid= prefs.getString("uid") ?? "";
+    await SharedPreferences.getInstance();
+
+    setState(() {
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +111,8 @@ class _loginpageState extends State<loginpage> {
                       )
                   ),
                 ),
-              ),SizedBox(height: 15,),
+              ),
+              SizedBox(height: 15,),
               Padding(
 
                 padding: const EdgeInsets.all(15.0),
@@ -100,6 +124,30 @@ class _loginpageState extends State<loginpage> {
                   decoration: InputDecoration(
                       hintText: "Enter Password",
                       label: Text("password"),
+
+                      focusedBorder: OutlineInputBorder(),
+
+
+                      border: OutlineInputBorder(
+                        //borderSide:BorderSide.strokeAlignInside, ,
+                        borderRadius: BorderRadius.circular(15),
+
+                      )
+                  ),
+                ),
+              ),
+              SizedBox(height: 15,),
+              Padding(
+
+                padding: const EdgeInsets.all(15.0),
+                child: TextField(
+                  controller: phonecontroller,
+                  obscureText: true,
+
+
+                  decoration: InputDecoration(
+                      hintText: "Enter phone no",
+                      label: Text("phone"),
 
                       focusedBorder: OutlineInputBorder(),
 
@@ -139,10 +187,26 @@ class _loginpageState extends State<loginpage> {
                   onPressed: ()async{
                     //Navigator.pushReplacement(context, MaterialPageRoute(builder: (c)=>Homepage(username: namecontroller.text)));
                     if(namecontroller.text.isNotEmpty &&emailcontroller.text.isNotEmpty && paswrdcontroller.text.isNotEmpty){
+                      FirebaseAuth auth=FirebaseAuth.instance;
+                                     try{
+                                       var cred= await auth.createUserWithEmailAndPassword(email: emailcontroller.text, password: paswrdcontroller.text);
+                                       print(cred.user!.uid);
+                                       FirebaseFirestore firestore= FirebaseFirestore.instance;
+                                       await firestore.collection("users").doc(cred.user!.uid).set({
+                                         "name":namecontroller.text,
+                                         "email": emailcontroller.text,
+                                         "mobileNo":phonecontroller.text
+
+                                       });
+                                     }catch(e){
+                                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                                     }
+
+
                       SharedPreferences mpref= await  SharedPreferences.getInstance();
                       mpref.setBool("login", true);
 
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c)=>Dashboard()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c)=>LoginPage()));
                     }else{
                       ScaffoldMessenger.of(context).showSnackBar( const SnackBar(content: Text("please enter all the columns", ),backgroundColor: Colors.red,));
                       setState(() {

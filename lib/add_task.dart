@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_manager/add_task.dart';
 
 
@@ -31,13 +32,17 @@ class addtask extends StatefulWidget {
 }
 
 class _addtaskState extends State<addtask> {
-  bool isSwitched= false;
-  var  datetime = DateTime.now().millisecondsSinceEpoch;
+///String uid="";
+  @override
+
+
 
   //DBhelper dbhelper= DBhelper.getinstance();
   //DBhelper dbhelper =DBhelper.getinstance();
   DateTime? selectedDate;
-
+  bool isSwitched= false;
+  String uid="";
+  var  datetime = DateTime.now().millisecondsSinceEpoch;
   TextEditingController titlecontroller= TextEditingController();
   TextEditingController descontroller= TextEditingController();
   TextEditingController assigneecotroller= TextEditingController();
@@ -53,6 +58,22 @@ class _addtaskState extends State<addtask> {
 
     return inherit;
   }*/
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUid();
+    setState(() {
+
+    });
+  }
+  void getUid()async{
+    var prefs= await  SharedPreferences.getInstance();
+    uid= prefs.getString("uid") ?? "";
+    setState(() {
+
+    });
+  }
   @override
   Widget build(BuildContext context) {
 
@@ -223,7 +244,7 @@ class _addtaskState extends State<addtask> {
                           if(titlecontroller.text.isNotEmpty && descontroller.text.isNotEmpty){
 
 
-                           await firestore.collection("tasks").doc().set({
+                           await firestore.collection("users").doc(uid).collection("tasks").doc(DateTime.now().toString() ).set({
                               "title" : titlecontroller.text,
                               "desc": descontroller.text,
                               "assignee": assigneecotroller.text,
@@ -232,10 +253,6 @@ class _addtaskState extends State<addtask> {
 
 
                             });
-
-
-
-
                           }
                           //addnotes();
                           Navigator.pop(context, MaterialPageRoute(builder: (c)=>Homepage(username: "" ,)));

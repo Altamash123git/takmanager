@@ -43,6 +43,10 @@ dependencies:
   cloud_firestore: ^5.4.5
   intl: ^0.19.0
   shared_preferences: ^2.3.3
+  firebase_messaging: ^15.1.4
+  firebase_auth: ^5.3.2
+  image_picker: ^1.1.2
+  image_cropper: ^8.0.2
 
 
 dev_dependencies:
